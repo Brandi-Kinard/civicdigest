@@ -1,0 +1,10 @@
+venv/
+civicdigest-model/
+adapters/0000*
+data/raw/
+data/pairs.jsonl
+data/pairs_filtered.jsonl
+__pycache__/
+.DS_Store
+*.pdf
+*.pyc
