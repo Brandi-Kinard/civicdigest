@@ -22,7 +22,15 @@ Paste raw meeting minutes. Get a 2-paragraph plain English summary covering:
 - **Base:** SmolLM2-1.7B-Instruct
 - **Method:** LoRA fine-tuning via MLX on Apple Silicon
 - **Training data:** City council meeting minutes from Chicago, Seattle, Denver, Phoenix, Detroit, Oakland, New York City, and San Francisco
-- **HuggingFace:** [Brandi-Kinard/civicdigest-smollm2-1.7b](https://huggingface.co/Brandi-Kinard/civicdigest-smollm2-1.7b)
+
+| Property | Value |
+| --- | --- |
+| Base model | SmolLM2-1.7B-Instruct |
+| Fine-tuning method | LoRA |
+| Training data | City council minutes from 8 major US cities |
+| Hardware | Apple M1 (or M2/M3) |
+| Inference memory | ~3.6 GB |
+| License | MIT |
 
 ---
 
