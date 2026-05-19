@@ -1,0 +1,10 @@
+anthropic
+flask
+flask-cors
+requests
+boto3
+tavily-python
+sendgrid
+pillow
+ffmpeg-python
+gunicorn
