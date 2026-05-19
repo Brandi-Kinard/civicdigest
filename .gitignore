@@ -17,4 +17,7 @@ __pycache__/
 .DS_Store
 
 # Temp assets that live locally only
-audiothumbnail.jpeg
+data/
+adapters/
+civicdigest-model/
+data/
