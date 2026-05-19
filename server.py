@@ -287,6 +287,13 @@ def health():
     return jsonify({"status": "ok"})
 
 
+@app.route('/debug/ffmpeg')
+def debug_ffmpeg():
+    import subprocess
+    result = subprocess.run(['find', '/', '-name', 'ffprobe', '-type', 'f'], 
+                          capture_output=True, text=True, timeout=15)
+    return jsonify({"stdout": result.stdout, "stderr": result.stderr[:500]})
+
 # ── Start ──────────────────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
