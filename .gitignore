@@ -1,10 +1,20 @@
+# Generated media files
+*.mp3
+*.mp4
+*.wav
+
+# Database
+subscribers.db
+
+# Python
 venv/
-civicdigest-model/
-adapters/0000*
-data/raw/
-data/pairs.jsonl
-data/pairs_filtered.jsonl
 __pycache__/
-.DS_Store
-*.pdf
 *.pyc
+*.pyo
+.env
+
+# macOS
+.DS_Store
+
+# Temp assets that live locally only
+audiothumbnail.jpeg

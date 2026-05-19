@@ -3,14 +3,18 @@ broadcast.py — CivicDigest Sprint 2.5
 Pipeline: meeting minutes → summary → broadcast script → ElevenLabs audio → D-ID/HeyGen video
 
 Requirements:
-    pip install anthropic requests python-dotenv
+    pip install anthropic requests python-dotenv boto3
 
 Environment variables (set in ~/.zshrc):
     ANTHROPIC_API_KEY=your_key
     ELEVENLABS_API_KEY=your_key
     DID_API_KEY=your_key
     HEYGEN_API_KEY=your_key
-    NGROK_URL=your_ngrok_url
+    R2_ACCOUNT_ID=your_account_id
+    R2_ACCESS_KEY_ID=your_access_key_id
+    R2_SECRET_ACCESS_KEY=your_secret_access_key
+    R2_BUCKET_NAME=civicdigest-audio
+    R2_PUBLIC_URL=https://pub-3e0b0bdb3e8c4ba6a7a9d1c6aac900f6.r2.dev
 
 Usage:
     python broadcast.py --minutes "path/to/minutes.txt"
@@ -24,6 +28,7 @@ import argparse
 import requests
 from pathlib import Path
 from anthropic import Anthropic
+from r2_upload import upload_audio as r2_upload_audio
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
@@ -38,7 +43,7 @@ ELEVENLABS_API_URL  = "https://api.elevenlabs.io/v1/text-to-speech"
 DID_API_URL         = "https://api.d-id.com"
 DID_PRESENTER_ID    = "v2_public_diana_purple_shirt_1_green_screen@HiT0penpLE"
 
-HEYGEN_AVATAR_ID = "8c0d8e7619a740bcb2b24d921eee6b60"  # Brandi's avatar
+HEYGEN_AVATAR_ID    = "8c0d8e7619a740bcb2b24d921eee6b60"  # Brandi's avatar
 HEYGEN_VOICE_ID     = "e4e7a92b410540b8845e1bf656aee40c"  # Brandi's cloned voice
 
 SUMMARIZE_MODEL     = "claude-haiku-4-5-20251001"
@@ -75,6 +80,8 @@ STRICT RULES — follow every one:
 - Never use passive voice if active voice is possible
 - Maximum 160 words — this must read aloud in 55-60 seconds
 - No anchor intro like "Good evening" or "I'm reporting" — start directly with the news
+- Report only what is in the summary above — do not add, infer, or combine details from different time periods
+- If the summary covers multiple years or budgets, focus exclusively on the most recent one
 - End with one sentence about what residents should do or expect next
 - Output plain text only — no markdown, no headers, no asterisks
 
@@ -97,6 +104,9 @@ def summarize_minutes(minutes_text: str) -> str:
         }]
     )
     summary = message.content[0].text.strip()
+    # Strip any markdown headers the model occasionally adds
+    import re
+    summary = re.sub(r'^#+\s+.*\n?', '', summary, flags=re.MULTILINE).strip()
     if summary.upper() == "SKIP":
         raise ValueError("No real meeting content found in input.")
     print(f"   ✅ Summary generated ({len(summary.split())} words)")
@@ -155,33 +165,16 @@ def generate_audio(script: str, output_path: str = "anchor_audio.mp3") -> str:
     return output_path
 
 
-# ── Step 4: Host audio for video providers ────────────────────────────────────
+# ── Step 4: Upload audio to Cloudflare R2 ────────────────────────────────────
+# Replaces the old ngrok + local HTTP server approach.
+# Uploads the ElevenLabs MP3 to R2 and returns a stable public URL
+# that D-ID or HeyGen can fetch from anywhere.
 
-def upload_audio_to_did(audio_path: str) -> str:
-    print("☁️  Step 4: Hosting audio...")
-    import http.server
-    import threading
-
-    audio_dir = str(Path(audio_path).parent.absolute())
-    audio_filename = Path(audio_path).name
-
-    httpd = http.server.HTTPServer(
-        ("0.0.0.0", 8888),
-        lambda *args: http.server.SimpleHTTPRequestHandler(
-            *args, directory=audio_dir
-        )
-    )
-    server_thread = threading.Thread(target=httpd.serve_forever)
-    server_thread.daemon = True
-    server_thread.start()
-
-    ngrok_url = os.environ.get("NGROK_URL", "").rstrip("/")
-    if not ngrok_url:
-        raise RuntimeError("Set NGROK_URL in ~/.zshrc to your ngrok public URL")
-
-    audio_url = f"{ngrok_url}/{audio_filename}"
-    print(f"   ✅ Audio URL: {audio_url}")
-    return audio_url
+def upload_audio_for_video(audio_path: str) -> str:
+    print("☁️  Step 4: Uploading audio to Cloudflare R2...")
+    public_url = r2_upload_audio(audio_path)
+    print(f"   ✅ Audio URL: {public_url}")
+    return public_url
 
 
 # ── Step 5a: Generate anchor video via D-ID ───────────────────────────────────
@@ -288,15 +281,11 @@ def generate_anchor_video_heygen(script: str) -> str:
 
     raise TimeoutError("HeyGen video did not complete in time.")
 
+
 # ── Step 5: Smart router — tries D-ID, falls back to HeyGen ──────────────────
 
 def generate_anchor_video(audio_url: str, script: str = "") -> str:
-    try:
-        return generate_anchor_video_did(audio_url)
-    except Exception as e:
-        print(f"   ⚠️  D-ID failed: {e}")
-        print("   🔄 Falling back to HeyGen...")
-        return generate_anchor_video_heygen(script)
+    return generate_anchor_video_heygen(script)
 
 
 # ── Step 6: Download final video ──────────────────────────────────────────────
@@ -320,7 +309,7 @@ def run_pipeline(minutes_text: str) -> str:
     summary   = summarize_minutes(minutes_text)
     script    = format_broadcast_script(summary)
     audio     = generate_audio(script)
-    audio_url = upload_audio_to_did(audio)
+    audio_url = upload_audio_for_video(audio)       # ← R2, not ngrok
     video_url = generate_anchor_video(audio_url, script)
     video     = download_video(video_url)
 

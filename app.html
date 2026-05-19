@@ -7,606 +7,319 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --red:     #C41E3A;
-    --dark-red:#8B0000;
-    --navy:    #0A0A1E;
-    --navy-mid:#12122E;
-    --navy-lt: #1A1A3E;
-    --white:   #F4F4F0;
-    --grey:    #8A8A9A;
-    --accent:  #E8C547;
-    --glass:   rgba(255,255,255,0.04);
-    --border:  rgba(255,255,255,0.08);
+    --red:#C41E3A; --dark-red:#8B0000; --navy:#0A0A1E; --navy-mid:#12122E;
+    --white:#F4F4F0; --grey:#8A8A9A; --accent:#E8C547; --green:#4CAF50;
+    --glass:rgba(255,255,255,0.04); --border:rgba(255,255,255,0.08);
   }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--navy);color:var(--white);font-family:'IBM Plex Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
 
-  * { margin:0; padding:0; box-sizing:border-box; }
+  /* Ticker */
+  .ticker-bar{background:var(--red);height:36px;display:flex;align-items:center;overflow:hidden;position:relative;z-index:10;}
+  .ticker-label{background:var(--dark-red);font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:0.15em;padding:0 16px;height:100%;display:flex;align-items:center;flex-shrink:0;white-space:nowrap;position:relative;z-index:3;}
+  .ticker-track{flex:1;overflow:hidden;position:relative;z-index:2;}
+  .ticker-scroll{display:flex;animation:ticker 40s linear infinite;white-space:nowrap;}
+  .ticker-scroll span{font-size:12px;padding:0 48px 0 24px;opacity:0.95;}
+  @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
-  body {
-    background: var(--navy);
-    color: var(--white);
-    font-family: 'IBM Plex Sans', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+  /* Header */
+  header{padding:28px 48px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;gap:20px;background:var(--navy);position:relative;z-index:1;}
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:0.04em;line-height:1;}
+  .logo span{color:var(--red);}
+  .logo-sub{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.18em;color:var(--grey);text-transform:uppercase;padding-bottom:6px;}
+  .live-badge{background:var(--red);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.15em;padding:5px 12px;margin-bottom:8px;display:flex;align-items:center;gap:6px;margin-left:auto;}
+  .live-dot{width:6px;height:6px;background:white;border-radius:50%;animation:pulse 1.5s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 
-  /* ── Noise texture overlay ── */
-  body::before {
-    content:'';
-    position:fixed;
-    inset:0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events:none;
-    z-index:0;
-  }
+  main{max-width:980px;margin:0 auto;padding:40px 48px;position:relative;z-index:1;}
 
-  /* ── Breaking news ticker ── */
-  .ticker-bar {
-    background: var(--red);
-    height: 36px;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    position: relative;
-    z-index: 10;
-  }
-  .ticker-label {
-    background: var(--dark-red);
-    color: var(--white);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.15em;
-    padding: 0 16px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    white-space: nowrap;
-    position: relative;
-    z-index: 2;
-  }
-  .ticker-scroll {
-    display: flex;
-    animation: ticker 40s linear infinite;
-    white-space: nowrap;
-  }
-  .ticker-scroll span {
-    font-size: 12px;
-    font-weight: 400;
-    letter-spacing: 0.05em;
-    padding: 0 48px 0 24px;
-    opacity: 0.95;
-  }
-  @keyframes ticker {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
+  /* Query */
+  .section-label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.2em;color:var(--red);text-transform:uppercase;margin-bottom:12px;}
+  .query-title{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:0.04em;margin-bottom:24px;line-height:0.95;}
+  .input-wrapper{display:flex;margin-bottom:14px;}
+  .query-input{flex:1;background:var(--navy-mid);border:1px solid var(--border);border-right:none;color:var(--white);font-family:'IBM Plex Sans',sans-serif;font-size:16px;font-weight:300;padding:18px 24px;outline:none;transition:border-color 0.2s;}
+  .query-input::placeholder{color:var(--grey);}
+  .query-input:focus{border-color:var(--red);}
+  .submit-btn{background:var(--red);color:var(--white);border:none;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;padding:18px 32px;cursor:pointer;transition:background 0.2s;white-space:nowrap;}
+  .submit-btn:hover{background:var(--dark-red);}
+  .submit-btn:disabled{background:#333;cursor:not-allowed;}
 
-  /* ── Header ── */
-  header {
-    padding: 32px 48px 24px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: flex-end;
-    gap: 24px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: var(--navy);
-  }
-  .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 52px;
-    letter-spacing: 0.04em;
-    line-height: 1;
-    color: var(--white);
-  }
-  .logo span {
-    color: var(--red);
-  }
-  .logo-sub {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    color: var(--grey);
-    text-transform: uppercase;
-    padding-bottom: 8px;
-  }
-  .live-badge {
-    background: var(--red);
-    color: var(--white);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.15em;
-    padding: 4px 10px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .live-dot {
-    width: 6px; height: 6px;
-    background: white;
-    border-radius: 50%;
-    animation: pulse 1.5s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
+  /* Chips — animated fill slide */
+  .examples{display:flex;gap:10px;flex-wrap:wrap;}
+  .example-chip{background:var(--glass);border:1px solid var(--border);color:var(--grey);font-size:12px;font-family:'IBM Plex Mono',monospace;padding:7px 16px;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;}
+  .example-chip::before{content:'';position:absolute;inset:0;background:var(--red);transform:translateX(-100%);transition:transform 0.25s ease;z-index:0;}
+  .example-chip:hover::before,.example-chip.active::before{transform:translateX(0);}
+  .example-chip span{position:relative;z-index:1;}
+  .example-chip:hover,.example-chip.active{color:white;border-color:var(--red);}
 
-  /* ── Main layout ── */
-  main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 48px;
-    position: relative;
-    z-index: 1;
-  }
+  /* Status */
+  .status-panel{display:none;background:var(--navy-mid);border:1px solid var(--border);border-left:3px solid var(--red);padding:24px;margin:32px 0;}
+  .status-panel.visible{display:block;}
+  .status-steps{display:flex;flex-direction:column;gap:10px;}
+  .status-step{display:flex;align-items:center;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--grey);transition:color 0.3s;}
+  .status-step.active{color:var(--white);}
+  .status-step.done{color:var(--green);}
+  .step-icon{width:18px;height:18px;border-radius:50%;border:1px solid var(--grey);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;transition:all 0.3s;}
+  .status-step.active .step-icon{border-color:var(--red);background:var(--red);animation:spin-pulse 1s ease-in-out infinite;}
+  .status-step.done .step-icon{border-color:var(--green);background:var(--green);color:white;}
+  @keyframes spin-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
 
-  /* ── Query section ── */
-  .query-section {
-    margin-bottom: 48px;
-  }
-  .section-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    color: var(--red);
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-  .query-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 36px;
-    letter-spacing: 0.04em;
-    color: var(--white);
-    margin-bottom: 24px;
-    line-height: 1.1;
-  }
+  /* Error */
+  .error-panel{display:none;background:rgba(196,30,58,0.1);border:1px solid var(--red);border-left:3px solid var(--red);padding:20px 24px;margin:20px 0;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#FF6B6B;}
+  .error-panel.visible{display:block;}
 
-  .input-wrapper {
-    position: relative;
-    display: flex;
-    gap: 0;
-  }
-  .query-input {
-    flex: 1;
-    background: var(--navy-mid);
-    border: 1px solid var(--border);
-    border-right: none;
-    color: var(--white);
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 16px;
-    font-weight: 300;
-    padding: 18px 24px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .query-input::placeholder {
-    color: var(--grey);
-  }
-  .query-input:focus {
-    border-color: var(--red);
-  }
-  .submit-btn {
-    background: var(--red);
-    color: var(--white);
-    border: none;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    padding: 18px 32px;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    white-space: nowrap;
-  }
-  .submit-btn:hover { background: var(--dark-red); }
-  .submit-btn:active { transform: scale(0.98); }
-  .submit-btn:disabled {
-    background: #333;
-    cursor: not-allowed;
-    transform: none;
-  }
+  /* Results */
+  .results-panel{display:none;animation:fadeUp 0.5s ease;}
+  .results-panel.visible{display:block;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
-  /* ── Example queries ── */
-  .examples {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 14px;
-  }
-  .example-chip {
-    background: var(--glass);
-    border: 1px solid var(--border);
-    color: var(--grey);
-    font-size: 12px;
-    font-family: 'IBM Plex Mono', monospace;
-    padding: 6px 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.02em;
-  }
-  .example-chip:hover {
-    border-color: var(--red);
-    color: var(--white);
-    background: rgba(196,30,58,0.1);
-  }
+  /* Section headers */
+  .section-header{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.2em;color:var(--red);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-header::after{content:'';flex:1;height:1px;background:var(--border);}
 
-  /* ── Status / loading ── */
-  .status-panel {
-    display: none;
-    background: var(--navy-mid);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--red);
-    padding: 24px;
-    margin-bottom: 40px;
-  }
-  .status-panel.visible { display: block; }
-  .status-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .status-step {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    color: var(--grey);
-    transition: color 0.3s;
-  }
-  .status-step.active { color: var(--white); }
-  .status-step.done { color: #4CAF50; }
-  .step-icon {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    border: 1px solid var(--grey);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    flex-shrink: 0;
-    transition: all 0.3s;
-  }
-  .status-step.active .step-icon {
-    border-color: var(--red);
-    background: var(--red);
-    animation: spin-pulse 1s ease-in-out infinite;
-  }
-  .status-step.done .step-icon {
-    border-color: #4CAF50;
-    background: #4CAF50;
-    color: white;
-  }
-  @keyframes spin-pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-  }
+  /* Ghost city watermark */
+  .city-hero{position:relative;margin:36px 0 0;}
+  .city-ghost{font-family:'Bebas Neue',sans-serif;font-size:96px;font-weight:900;color:white;letter-spacing:0.06em;line-height:1;opacity:0.06;pointer-events:none;user-select:none;}
+  .city-stamp{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.28em;color:var(--red);text-transform:uppercase;margin-top:-52px;margin-bottom:14px;position:relative;}
 
-  /* ── Results ── */
-  .results-panel {
-    display: none;
-    animation: fadeUp 0.5s ease;
-  }
-  .results-panel.visible { display: block; }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  /* Player — NO left border per Brandi's request */
+  .podcast-player{background:var(--navy-mid);border:1px solid var(--border);padding:24px;display:flex;align-items:center;gap:24px;}
 
-  .results-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    margin-bottom: 32px;
-  }
+  /* Thumbnail image replaces the red box */
+  .player-thumb{width:80px;height:80px;flex-shrink:0;overflow:hidden;background:var(--navy-mid);}
+  .player-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
 
-  .result-card {
-    background: var(--navy-mid);
-    border: 1px solid var(--border);
-    padding: 28px;
-  }
-  .result-card-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 0.2em;
-    color: var(--red);
-    text-transform: uppercase;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .result-card-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-  .summary-text {
-    font-size: 14px;
-    font-weight: 300;
-    line-height: 1.7;
-    color: var(--white);
-  }
-  .script-text {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    line-height: 1.8;
-    color: #B0B0C0;
-    white-space: pre-wrap;
-  }
+  .player-body{flex:1;min-width:0;}
+  .player-title{font-size:15px;font-weight:600;color:var(--white);margin-bottom:4px;}
+  .player-subtitle{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--grey);margin-bottom:14px;}
+  .scrubber-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .time-label{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--grey);flex-shrink:0;min-width:36px;}
+  .scrubber{flex:1;-webkit-appearance:none;appearance:none;height:3px;background:var(--border);outline:none;cursor:pointer;}
+  .scrubber::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--red);cursor:pointer;}
+  .scrubber::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--red);cursor:pointer;border:none;}
+  .controls-row{display:flex;align-items:center;gap:16px;}
+  .ctrl-btn{background:none;border:none;color:var(--grey);cursor:pointer;padding:4px;display:flex;align-items:center;gap:3px;font-family:'IBM Plex Mono',monospace;font-size:11px;transition:color 0.2s;}
+  .ctrl-btn:hover{color:var(--white);}
+  .skip-arrows{display:flex;align-items:center;gap:2px;}
+  .skip-arrows .arr{width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;}
+  .skip-arrows.back .arr{border-right:7px solid currentColor;}
+  .skip-arrows.fwd .arr{border-left:7px solid currentColor;}
+  .play-btn{background:var(--red);color:white;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;transition:background 0.2s,transform 0.1s;flex-shrink:0;}
+  .play-btn:hover{background:var(--dark-red);}
+  .play-btn:active{transform:scale(0.95);}
+  .play-btn svg{width:18px;height:18px;fill:white;}
+  #nativeAudio{display:none;}
 
-  /* ── Video player ── */
-  .video-section {
-    margin-bottom: 32px;
-  }
-  .video-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 0.2em;
-    color: var(--red);
-    text-transform: uppercase;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .video-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-  .video-wrapper {
-    background: #000;
-    border: 1px solid var(--border);
-    position: relative;
-    aspect-ratio: 16/9;
-    max-width: 900px;
-  }
-  .video-wrapper video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .video-placeholder {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    color: var(--grey);
-  }
-  .video-placeholder-icon {
-    font-size: 48px;
-    opacity: 0.3;
-  }
-  .video-placeholder-text {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    opacity: 0.5;
-  }
+  /* Email */
+  .email-section{margin:20px 0 24px;}
+  .email-card{background:var(--glass);border:1px solid var(--border);padding:18px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .email-card-icon{font-size:20px;flex-shrink:0;}
+  .email-card-text{flex:1;min-width:180px;}
+  .email-card-title{font-size:14px;font-weight:500;color:var(--white);margin-bottom:3px;}
+  .email-card-sub{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--grey);}
+  .email-input-row{display:flex;flex-shrink:0;}
+  .email-input{background:var(--navy-mid);border:1px solid var(--border);border-right:none;color:var(--white);font-family:'IBM Plex Sans',sans-serif;font-size:13px;padding:10px 16px;outline:none;width:220px;transition:border-color 0.2s;}
+  .email-input::placeholder{color:var(--grey);font-size:12px;}
+  .email-input:focus{border-color:var(--red);}
+  .email-submit{background:var(--red);color:white;border:none;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;padding:10px 18px;cursor:pointer;transition:background 0.2s;white-space:nowrap;}
+  .email-submit:hover{background:var(--dark-red);}
+  .email-submit:disabled{background:#333;cursor:not-allowed;}
+  .email-confirm{display:none;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--green);}
+  .email-confirm.visible{display:block;}
 
-  /* ── Download bar ── */
-  .download-bar {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    padding: 16px 20px;
-    background: var(--glass);
-    border: 1px solid var(--border);
-    max-width: 900px;
-    margin-top: 12px;
-  }
-  .download-info {
-    flex: 1;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--grey);
-  }
-  .download-info strong {
-    color: var(--white);
-    display: block;
-    font-size: 13px;
-    margin-bottom: 2px;
-  }
-  .download-btn {
-    background: transparent;
-    border: 1px solid var(--red);
-    color: var(--red);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    padding: 8px 20px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-    display: inline-block;
-  }
-  .download-btn:hover {
-    background: var(--red);
-    color: white;
-  }
+  /* Video */
+  .video-section{margin-bottom:36px;}
+  .video-status-bar{background:var(--navy-mid);border:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:12px;}
+  .render-dot{width:7px;height:7px;background:var(--accent);border-radius:50%;animation:pulse 1.5s ease-in-out infinite;flex-shrink:0;}
+  .render-dot.done{background:var(--green);animation:none;}
+  .render-dot.error{background:var(--red);animation:none;}
+  .render-status-text{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--grey);flex:1;}
+  .render-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--red);letter-spacing:0.1em;border:1px solid rgba(196,30,58,0.4);padding:3px 8px;}
+  .video-wrapper{background:#000;border:1px solid var(--border);border-top:none;aspect-ratio:16/9;display:none;}
+  .video-wrapper video{width:100%;height:100%;object-fit:cover;display:block;}
+  /* No-icon placeholder — just text */
+  .video-placeholder-bare{background:#000;border:1px solid var(--border);border-top:none;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;}
+  .video-placeholder-bare span{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--grey);opacity:0.4;letter-spacing:0.08em;}
 
-  /* ── Error ── */
-  .error-panel {
-    display: none;
-    background: rgba(196,30,58,0.1);
-    border: 1px solid var(--red);
-    border-left: 3px solid var(--red);
-    padding: 20px 24px;
-    margin-bottom: 32px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    color: #FF6B6B;
-  }
-  .error-panel.visible { display: block; }
+  /* Tabs */
+  .tabs-section{margin-bottom:32px;}
+  .tab-bar{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px;}
+  .tab-btn{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:var(--grey);background:none;border:none;padding:10px 20px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;}
+  .tab-btn:hover{color:var(--white);}
+  .tab-btn.active{color:var(--white);border-bottom-color:var(--red);}
+  .tab-pane{display:none;}
+  .tab-pane.active{display:block;}
+  .summary-text{font-size:15px;font-weight:300;line-height:1.75;color:var(--white);}
+  .script-text{font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.8;color:#B0B0C0;white-space:pre-wrap;}
 
-  /* ── Footer ── */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 24px 48px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: relative;
-    z-index: 1;
+  /* Disclaimer */
+  .disclaimer{margin-bottom:40px;}
+  .disclaimer-text{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--grey);line-height:1.6;}
+  .disclaimer-text a{color:var(--grey);text-decoration:underline;text-underline-offset:3px;}
+  .disclaimer-text a:hover{color:var(--white);}
+
+  footer{border-top:1px solid var(--border);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
+  .footer-left{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--grey);}
+  .footer-right a{color:var(--red);text-decoration:none;font-family:'IBM Plex Mono',monospace;font-size:11px;}
+  .footer-right a:hover{color:var(--white);}
+
+  @media(max-width:768px){
+    header{padding:20px;}
+    main{padding:24px 20px;}
+    .query-title{font-size:40px;}
+    .podcast-player{flex-wrap:wrap;}
+    .email-card{flex-direction:column;align-items:flex-start;}
+    .email-input{width:180px;}
+    footer{padding:20px;flex-direction:column;gap:12px;}
   }
-  .footer-left {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    color: var(--grey);
-    letter-spacing: 0.08em;
-  }
-  .footer-right {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    color: var(--grey);
-    letter-spacing: 0.08em;
-  }
-  .footer-right a {
-    color: var(--red);
-    text-decoration: none;
-  }
-  .footer-right a:hover { color: var(--white); }
 </style>
 </head>
 <body>
 
-<!-- Breaking news ticker -->
 <div class="ticker-bar">
   <div class="ticker-label">CIVICDIGEST</div>
-  <div class="ticker-scroll">
-    <span>AI-powered local government intelligence • City council decisions in plain English • Real-time meeting summaries</span>
-    <span>Ask about any city council meeting • Get text, audio, and broadcast video • Powered by locally-trained AI</span>
-    <span>AI-powered local government intelligence • City council decisions in plain English • Real-time meeting summaries</span>
-    <span>Ask about any city council meeting • Get text, audio, and broadcast video • Powered by locally-trained AI</span>
+  <div class="ticker-track">
+    <div class="ticker-scroll">
+      <span>AI-powered local government intelligence • City council decisions in plain English • Real-time meeting summaries</span>
+      <span>Ask about any city council meeting • Get audio summaries and broadcast video • Powered by locally-trained AI</span>
+      <span>AI-powered local government intelligence • City council decisions in plain English • Real-time meeting summaries</span>
+      <span>Ask about any city council meeting • Get audio summaries and broadcast video • Powered by locally-trained AI</span>
+    </div>
   </div>
 </div>
 
-<!-- Header -->
 <header>
-  <div>
-    <div class="logo">Civic<span>Digest</span></div>
-  </div>
+  <div><div class="logo">Civic<span>Digest</span></div></div>
   <div class="logo-sub">Local Government Intelligence</div>
-  <div style="margin-left:auto">
-    <div class="live-badge">
-      <div class="live-dot"></div>
-      LIVE
-    </div>
-  </div>
+  <div class="live-badge"><div class="live-dot"></div>LIVE</div>
 </header>
 
-<!-- Main -->
 <main>
 
-  <!-- Query section -->
-  <div class="query-section">
+  <!-- Query -->
+  <div style="margin-bottom:40px;">
     <div class="section-label">// Ask CivicDigest</div>
     <div class="query-title">What's happening<br>in your city?</div>
-
     <div class="input-wrapper">
-      <input
-        class="query-input"
-        id="queryInput"
-        type="text"
-        placeholder="What is your city council working on right now?"
-        autocomplete="off"
-      />
-      <button class="submit-btn" id="submitBtn" onclick="runPipeline()">
-        Generate Report →
-      </button>
+      <input class="query-input" id="queryInput" type="text"
+        placeholder="What is your city council working on right now?" autocomplete="off"/>
+      <button class="submit-btn" id="submitBtn" onclick="runPipeline()">Generate Report →</button>
     </div>
-
     <div class="examples">
-      <div class="example-chip" onclick="setQuery(this)">Chicago budget vote</div>
-      <div class="example-chip" onclick="setQuery(this)">Seattle zoning decisions</div>
-      <div class="example-chip" onclick="setQuery(this)">Denver city council this week</div>
-      <div class="example-chip" onclick="setQuery(this)">NYC affordable housing vote</div>
-      <div class="example-chip" onclick="setQuery(this)">Phoenix road infrastructure</div>
+      <div class="example-chip" onclick="setQuery(this)"><span>Chicago budget vote</span></div>
+      <div class="example-chip" onclick="setQuery(this)"><span>Seattle zoning decisions</span></div>
+      <div class="example-chip" onclick="setQuery(this)"><span>Denver city council this week</span></div>
+      <div class="example-chip" onclick="setQuery(this)"><span>NYC affordable housing vote</span></div>
+      <div class="example-chip" onclick="setQuery(this)"><span>Phoenix road infrastructure</span></div>
     </div>
   </div>
 
-  <!-- Status panel -->
+  <!-- Status -->
   <div class="status-panel" id="statusPanel">
-    <div class="status-steps" id="statusSteps">
-      <div class="status-step" id="step1">
-        <div class="step-icon">1</div>
-        <span>Searching the web for meeting minutes...</span>
-      </div>
-      <div class="status-step" id="step2">
-        <div class="step-icon">2</div>
-        <span>Summarizing with CivicDigest AI...</span>
-      </div>
-      <div class="status-step" id="step3">
-        <div class="step-icon">3</div>
-        <span>Writing broadcast script...</span>
-      </div>
-      <div class="status-step" id="step4">
-        <div class="step-icon">4</div>
-        <span>Generating anchor voice (ElevenLabs)...</span>
-      </div>
-      <div class="status-step" id="step5">
-        <div class="step-icon">5</div>
-        <span>Rendering AI anchor video...</span>
-      </div>
-      <div class="status-step" id="step6">
-        <div class="step-icon">6</div>
-        <span>Compositing broadcast graphics...</span>
-      </div>
+    <div class="status-steps">
+      <div class="status-step" id="step1"><div class="step-icon">1</div><span>Searching for meeting minutes...</span></div>
+      <div class="status-step" id="step2"><div class="step-icon">2</div><span>Summarizing with CivicDigest AI...</span></div>
+      <div class="status-step" id="step3"><div class="step-icon">3</div><span>Writing broadcast script...</span></div>
+      <div class="status-step" id="step4"><div class="step-icon">4</div><span>Generating anchor voice...</span></div>
     </div>
   </div>
 
-  <!-- Error panel -->
   <div class="error-panel" id="errorPanel"></div>
 
   <!-- Results -->
   <div class="results-panel" id="resultsPanel">
 
-    <!-- Text + Script cards -->
-    <div class="results-grid">
-      <div class="result-card">
-        <div class="result-card-label">Plain English Summary</div>
-        <div class="summary-text" id="summaryText"></div>
+    <!-- Ghost watermark + audio player -->
+    <div class="city-hero">
+      <div class="city-ghost" id="cityGhost"></div>
+      <div class="city-stamp" id="cityStamp"></div>
+      <div class="section-header">Audio Broadcast</div>
+      <div class="podcast-player">
+        <div class="player-thumb">
+          <img src="/assets/audiothumbnail.jpeg" alt="CivicDigest anchor" id="playerThumbImg"
+            onerror="this.style.display='none';this.parentElement.innerHTML='<div style=\'width:80px;height:80px;background:var(--red);display:flex;align-items:center;justify-content:center;font-family:Bebas Neue,sans-serif;font-size:13px;color:white;text-align:center;line-height:1.3;\'>CIVIC<br>DIGEST</div>'"/>
+        </div>
+        <div class="player-body">
+          <div class="player-title" id="playerTitle">CivicDigest Report</div>
+          <div class="player-subtitle" id="playerSubtitle">AI-generated broadcast summary</div>
+          <div class="scrubber-row">
+            <span class="time-label" id="timeElapsed">0:00</span>
+            <input type="range" class="scrubber" id="scrubber" min="0" max="100" value="0" step="0.1">
+            <span class="time-label" id="timeDuration" style="text-align:right">0:00</span>
+          </div>
+          <div class="controls-row">
+            <button class="ctrl-btn" onclick="skipAudio(-10)" title="Rewind 10s">
+              <span class="skip-arrows back"><span class="arr"></span><span class="arr"></span></span>10
+            </button>
+            <button class="play-btn" id="playBtn" onclick="togglePlay()">
+              <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <button class="ctrl-btn" onclick="skipAudio(10)" title="Forward 10s">
+              10<span class="skip-arrows fwd"><span class="arr"></span><span class="arr"></span></span>
+            </button>
+          </div>
+        </div>
       </div>
-      <div class="result-card">
-        <div class="result-card-label">Broadcast Script</div>
-        <div class="script-text" id="scriptText"></div>
+      <audio id="nativeAudio" preload="auto"></audio>
+    </div>
+
+    <!-- Email capture -->
+    <div class="email-section">
+      <div class="email-card">
+        <div class="email-card-icon">🎬</div>
+        <div class="email-card-text">
+          <div class="email-card-title">Want the full broadcast video?</div>
+          <div class="email-card-sub">AI news anchor report · rendering in background · we'll email you when it's ready</div>
+        </div>
+        <div id="emailFormArea">
+          <div class="email-input-row">
+            <input class="email-input" id="emailInput" type="email" placeholder="your@email.com" autocomplete="email"/>
+            <button class="email-submit" id="emailSubmitBtn" onclick="submitEmail()">Notify Me</button>
+          </div>
+        </div>
+        <div class="email-confirm" id="emailConfirm">✓ We'll email you when it's ready</div>
       </div>
     </div>
 
     <!-- Video -->
     <div class="video-section">
-      <div class="video-label">Broadcast Video</div>
+      <div class="section-header">Broadcast Video</div>
+      <div class="video-status-bar">
+        <span class="render-dot" id="renderDot"></span>
+        <span class="render-status-text" id="renderStatusText">Rendering broadcast video in background — this takes about 15 minutes...</span>
+        <span class="render-tag" id="renderTag">IN QUEUE</span>
+      </div>
+      <!-- No icon placeholder — just text -->
+      <div class="video-placeholder-bare" id="videoPlaceholder">
+        <span>Video will appear here when ready</span>
+      </div>
       <div class="video-wrapper" id="videoWrapper">
-        <div class="video-placeholder" id="videoPlaceholder">
-          <div class="video-placeholder-icon">📺</div>
-          <div class="video-placeholder-text">Video generating...</div>
-        </div>
-        <video id="videoPlayer" controls style="display:none">
+        <video id="videoPlayer" controls>
           <source id="videoSource" src="" type="video/mp4">
         </video>
       </div>
-      <div class="download-bar" id="downloadBar" style="display:none">
-        <div class="download-info">
-          <strong id="downloadTitle">CivicDigest Report</strong>
-          <span>MP4 • 1920×1080 • AI-generated broadcast</span>
-        </div>
-        <a class="download-btn" id="downloadBtn" href="#" download>
-          Download MP4
-        </a>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-section">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('summary',this)">Plain English Summary</button>
+        <button class="tab-btn" onclick="switchTab('script',this)">Broadcast Script</button>
+      </div>
+      <div class="tab-pane active" id="tab-summary">
+        <div class="summary-text" id="summaryText"></div>
+      </div>
+      <div class="tab-pane" id="tab-script">
+        <div class="script-text" id="scriptText"></div>
+      </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+      <div class="disclaimer-text">
+        This summary is AI-generated from publicly available city council records and may contain errors or omissions. It is not a substitute for official meeting minutes.
+        <a id="sourceLink" href="#" target="_blank">View original meeting records</a>
       </div>
     </div>
 
@@ -614,87 +327,191 @@
 
 </main>
 
-<!-- Footer -->
 <footer>
-  <div class="footer-left">
-    CIVICDIGEST v1.0 — Built on M1 Mac · SmolLM2-1.7B fine-tuned · ElevenLabs · D-ID
-  </div>
-  <div class="footer-right">
-    <a href="https://github.com/Brandi-Kinard/civicdigest" target="_blank">github.com/Brandi-Kinard/civicdigest</a>
-  </div>
+  <div class="footer-left">CIVICDIGEST v2.0 — Local government intelligence, AI-generated</div>
+  <div class="footer-right"><a href="https://github.com/Brandi-Kinard/civicdigest" target="_blank">github.com/Brandi-Kinard/civicdigest</a></div>
 </footer>
 
 <script>
-// ── State ──────────────────────────────────────────────────────────────────
-const API_BASE = 'http://127.0.0.1:5050';
+const API_BASE = window.location.origin;
+let currentCity = '';
+let currentJobId = '';
+let pollTimer = null;
 
 function setQuery(el) {
-  document.getElementById('queryInput').value = el.textContent;
+  document.getElementById('queryInput').value = el.querySelector('span').textContent;
+  document.querySelectorAll('.example-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
   document.getElementById('queryInput').focus();
 }
-
-function setStep(stepId, state) {
-  const el = document.getElementById(stepId);
+function setStep(id, state) {
+  const el = document.getElementById(id);
   if (!el) return;
   el.className = 'status-step ' + state;
-  if (state === 'done') {
-    el.querySelector('.step-icon').textContent = '✓';
-  }
+  if (state === 'done') el.querySelector('.step-icon').textContent = '✓';
 }
-
 function showError(msg) {
   const el = document.getElementById('errorPanel');
-  el.textContent = '⚠ ' + msg;
+  el.textContent = msg;
   el.classList.add('visible');
 }
-
-function hideError() {
-  document.getElementById('errorPanel').classList.remove('visible');
+function hideError() { document.getElementById('errorPanel').classList.remove('visible'); }
+function formatTime(s) {
+  if (isNaN(s)) return '0:00';
+  return `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+}
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
 }
 
+/* Audio player */
+const audio = document.getElementById('nativeAudio');
+const scrubber = document.getElementById('scrubber');
+
+function loadAudioPlayer(url, city) {
+  audio.src = url;
+  audio.load();
+  document.getElementById('cityGhost').textContent = city.toUpperCase();
+  document.getElementById('cityStamp').textContent = `📍 ${city}, — City Council Report · ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}`;
+  document.getElementById('playerTitle').textContent = `${city} City Council Report`;
+  document.getElementById('playerSubtitle').textContent = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) + ' · AI-generated broadcast summary';
+
+  audio.addEventListener('loadedmetadata', () => {
+    document.getElementById('timeDuration').textContent = formatTime(audio.duration);
+    scrubber.max = audio.duration;
+  });
+  audio.addEventListener('timeupdate', () => {
+    document.getElementById('timeElapsed').textContent = formatTime(audio.currentTime);
+    scrubber.value = audio.currentTime;
+    const pct = (audio.currentTime / audio.duration * 100) || 0;
+    scrubber.style.background = `linear-gradient(to right, var(--red) ${pct}%, var(--border) ${pct}%)`;
+  });
+  audio.addEventListener('ended', () => {
+    document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+  });
+  scrubber.addEventListener('input', () => { audio.currentTime = parseFloat(scrubber.value); });
+}
+function togglePlay() {
+  if (audio.paused) {
+    audio.play();
+    document.getElementById('playIcon').innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+  } else {
+    audio.pause();
+    document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+  }
+}
+function skipAudio(s) {
+  audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + s));
+}
+
+/* Video polling */
+function startPolling(jobId) {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    try {
+      const r = await fetch(`${API_BASE}/job/${jobId}`);
+      const data = await r.json();
+      if (data.status === 'done' && data.video_url) {
+        clearInterval(pollTimer);
+        showVideo(data.video_url);
+      } else if (data.status === 'error') {
+        clearInterval(pollTimer);
+        document.getElementById('renderStatusText').textContent = 'Video rendering failed. Your audio summary is available above.';
+        document.getElementById('renderDot').classList.add('error');
+        document.getElementById('renderTag').textContent = 'FAILED';
+      }
+    } catch(e) {}
+  }, 10000);
+}
+function showVideo(url) {
+  document.getElementById('renderDot').classList.add('done');
+  document.getElementById('renderStatusText').textContent = 'Broadcast video ready';
+  document.getElementById('renderTag').textContent = 'READY';
+  document.getElementById('renderTag').style.borderColor = 'rgba(76,175,80,0.4)';
+  document.getElementById('renderTag').style.color = 'var(--green)';
+  document.getElementById('videoSource').src = url;
+  document.getElementById('videoPlayer').load();
+  document.getElementById('videoPlaceholder').style.display = 'none';
+  document.getElementById('videoWrapper').style.display = 'block';
+  document.getElementById('videoWrapper').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* Email */
+async function submitEmail() {
+  const email = document.getElementById('emailInput').value.trim();
+  if (!email || !email.includes('@')) {
+    document.getElementById('emailInput').style.borderColor = 'var(--red)';
+    return;
+  }
+  const btn = document.getElementById('emailSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  try {
+    const res = await fetch(`${API_BASE}/subscribe`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email, city:currentCity, job_id:currentJobId})
+    });
+    if (res.ok) {
+      document.getElementById('emailFormArea').style.display = 'none';
+      document.getElementById('emailConfirm').classList.add('visible');
+    } else { btn.disabled = false; btn.textContent = 'Notify Me'; }
+  } catch { btn.disabled = false; btn.textContent = 'Notify Me'; }
+}
+
+/* Main pipeline */
 async function runPipeline() {
   const query = document.getElementById('queryInput').value.trim();
   if (!query) return;
 
-  // Reset UI
+  if (pollTimer) clearInterval(pollTimer);
   hideError();
+  currentCity = ''; currentJobId = '';
+
   document.getElementById('statusPanel').classList.add('visible');
   document.getElementById('resultsPanel').classList.remove('visible');
   document.getElementById('submitBtn').disabled = true;
   document.getElementById('submitBtn').textContent = 'Generating...';
+  document.getElementById('emailConfirm').classList.remove('visible');
+  document.getElementById('emailFormArea').style.display = '';
+  document.getElementById('emailSubmitBtn').disabled = false;
+  document.getElementById('emailSubmitBtn').textContent = 'Notify Me';
+  document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+  document.getElementById('videoWrapper').style.display = 'none';
+  document.getElementById('videoPlaceholder').style.display = 'flex';
+  document.getElementById('videoSource').src = '';
+  document.getElementById('renderDot').className = 'render-dot';
+  document.getElementById('renderDot').style.background = '';
+  document.getElementById('renderStatusText').textContent = 'Rendering broadcast video in background — this takes about 15 minutes...';
+  document.getElementById('renderTag').textContent = 'IN QUEUE';
+  document.getElementById('renderTag').style.borderColor = '';
+  document.getElementById('renderTag').style.color = '';
 
-  // Reset steps
-  ['step1','step2','step3','step4','step5','step6'].forEach(s => {
+  ['step1','step2','step3','step4'].forEach(s => {
     const el = document.getElementById(s);
     el.className = 'status-step';
     el.querySelector('.step-icon').textContent = el.id.replace('step','');
   });
 
   try {
-    // Call the local Flask API
-    setStep('step1', 'active');
-
+    setStep('step1','active');
     const response = await fetch(`${API_BASE}/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({query})
     });
+    if (!response.ok) { const e = await response.json(); throw new Error(e.error || 'Pipeline failed'); }
 
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error || 'Pipeline failed');
-    }
-
-    // Stream status updates via SSE or poll
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
 
     while (true) {
-      const { done, value } = await reader.read();
+      const {done, value} = await reader.read();
       if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
+      buffer += decoder.decode(value, {stream:true});
       const lines = buffer.split('\n');
       buffer = lines.pop();
 
@@ -703,33 +520,24 @@ async function runPipeline() {
         const data = JSON.parse(line.slice(6));
 
         if (data.step) setStep('step' + data.step, data.state || 'done');
-        if (data.summary) {
-          document.getElementById('summaryText').textContent = data.summary;
-        }
-        if (data.script) {
-          document.getElementById('scriptText').textContent = data.script;
-        }
-        if (data.video_url) {
-          const video = document.getElementById('videoPlayer');
-          document.getElementById('videoSource').src = data.video_url;
-          video.load();
-          video.style.display = 'block';
-          document.getElementById('videoPlaceholder').style.display = 'none';
+        if (data.summary) document.getElementById('summaryText').textContent = data.summary;
+        if (data.script)  document.getElementById('scriptText').textContent  = data.script;
 
-          const downloadBtn = document.getElementById('downloadBtn');
-          downloadBtn.href = data.video_url;
-          document.getElementById('downloadTitle').textContent =
-            `CivicDigest — ${data.city || 'City'} Report`;
-          document.getElementById('downloadBar').style.display = 'flex';
-        }
-        if (data.done) {
+        if (data.audio_ready && data.audio_url) {
+          currentCity  = data.city   || '';
+          currentJobId = data.job_id || '';
+          loadAudioPlayer(data.audio_url, currentCity);
+          const q = encodeURIComponent(`${currentCity} city council meeting minutes official`);
+          document.getElementById('sourceLink').href = `https://www.google.com/search?q=${q}`;
+          ['step1','step2','step3','step4'].forEach(s => setStep(s,'done'));
+          document.getElementById('statusPanel').classList.remove('visible');
           document.getElementById('resultsPanel').classList.add('visible');
-          ['step1','step2','step3','step4','step5','step6'].forEach(s => setStep(s, 'done'));
+          if (currentJobId) startPolling(currentJobId);
         }
+
         if (data.error) throw new Error(data.error);
       }
     }
-
   } catch (err) {
     showError(err.message);
     document.getElementById('statusPanel').classList.remove('visible');
@@ -739,7 +547,6 @@ async function runPipeline() {
   }
 }
 
-// Enter key support
 document.getElementById('queryInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') runPipeline();
 });
