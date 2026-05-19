@@ -209,8 +209,18 @@ def build_overlay(meta, ots_path, frame_num):
 
 # ── Video info ────────────────────────────────────────────────────────────────
 def get_video_info(path):
+    import shutil
+    ffprobe_cmd = shutil.which("ffprobe") or shutil.which("ffprobe.exe")
+    if not ffprobe_cmd:
+        for candidate in ["/nix/var/nix/profiles/default/bin/ffprobe",
+                          "/usr/bin/ffprobe", "/usr/local/bin/ffprobe"]:
+            if Path(candidate).exists():
+                ffprobe_cmd = candidate
+                break
+    if not ffprobe_cmd:
+        raise RuntimeError("ffprobe not found")
     result = subprocess.run([
-        "ffprobe", "-v", "quiet", "-print_format", "json",
+        ffprobe_cmd, "-v", "quiet", "-print_format", "json",
         "-show_streams", "-show_format", path
     ], capture_output=True, text=True)
     data = json.loads(result.stdout)
@@ -233,8 +243,10 @@ def composite_broadcast(anchor_video, ots_path, meta, output_path):
     # Extract anchor frames
     anchor_dir = Path(tempfile.mkdtemp())
     print("   Extracting anchor frames...")
+    import shutil
+    ffmpeg_cmd = shutil.which("ffmpeg") or "/nix/var/nix/profiles/default/bin/ffmpeg"
     subprocess.run([
-        "ffmpeg", "-y", "-i", anchor_video,
+        ffmpeg_cmd, "-y", "-i", anchor_video,
         f"{anchor_dir}/%05d.png"
     ], capture_output=True, check=True)
 
@@ -273,7 +285,7 @@ def composite_broadcast(anchor_video, ots_path, meta, output_path):
     # Encode
     print("   Encoding final video...")
     cmd = [
-        "ffmpeg", "-y",
+        ffmpeg_cmd, "-y",
         "-framerate", str(int(fps)),
         "-i", f"{out_dir}/%05d.png",
         "-i", anchor_video,
