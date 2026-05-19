@@ -1,2 +1,8 @@
 [phases.setup]
 nixPkgs = ["ffmpeg"]
+
+[phases.build]
+cmds = ["pip install -r requirements.txt"]
+
+[start]
+cmd = "export PATH=$PATH:/nix/var/nix/profiles/default/bin && python server.py"
