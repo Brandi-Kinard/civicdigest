@@ -165,20 +165,20 @@ def build_overlay(meta, ots_path, frame_num):
         draw.rectangle([ots_x, ots_y, ots_x + ots_w, ots_y + ots_h], fill=(*NAVY_SOLID, 255))
     # Topic tag bar below OTS image
     draw.rectangle([ots_x, ots_y + ots_h, ots_x + ots_w, ots_y + ots_h + 36], fill=(*RED, 255))
-    draw.text((ots_x + 12, ots_y + ots_h + 6), topic, fill=WHITE, font=font(22))
+    draw.text((ots_x + 12, ots_y + ots_h + 6), topic, fill=WHITE, font=font(36))
 
     # ── Headline bar ──────────────────────────────────────────────────────────
     hl_y = 820
     hl_w = ots_x - 40          # spans from left to just before OTS column
     draw.rectangle([30, hl_y, hl_w, hl_y + 52], fill=(*NAVY_SOLID, 215))
-    draw.text((50, hl_y + 10), headline, fill=WHITE, font=font(30))
+    draw.text((50, hl_y + 10), headline, fill=WHITE, font=font(52))
 
     # ── Lower thirds ─────────────────────────────────────────────────────────
     lt_y = 878
     draw.rectangle([30, lt_y, 680, lt_y + 5], fill=(*RED, 255))      # red line
     draw.rectangle([30, lt_y + 5, 680, lt_y + 78], fill=(*NAVY_SOLID, 218))
-    draw.text((48, lt_y + 10), name,      fill=WHITE, font=font(32))
-    draw.text((48, lt_y + 50), title_loc, fill=(*GREY, 255), font=font(20))
+    draw.text((48, lt_y + 10), name,      fill=WHITE, font=font(48))
+    draw.text((48, lt_y + 50), title_loc, fill=(*GREY, 255), font=font(32))
 
     # ── Ticker bar ────────────────────────────────────────────────────────────
     ticker_y = H - 44
@@ -190,7 +190,7 @@ def build_overlay(meta, ots_path, frame_num):
     # BREAKING label box — solid dark red, sits on top, clips ticker text
     breaking_w = 170
     draw.rectangle([0, ticker_y, breaking_w, H], fill=(*DARK_RED, 255))
-    draw.text((12, ticker_y + 10), "BREAKING", fill=WHITE, font=font(22))
+    draw.text((12, ticker_y + 10), "BREAKING", fill=WHITE, font=font(30))
 
     # Scrolling ticker — starts AFTER the BREAKING box
     scroll_speed = 4
@@ -202,7 +202,7 @@ def build_overlay(meta, ots_path, frame_num):
     # We do this by creating a sub-image for the ticker region
     ticker_region = Image.new("RGBA", (W - breaking_w, ticker_h), (0, 0, 0, 0))
     tdraw = ImageDraw.Draw(ticker_region)
-    tdraw.text((tx - ticker_start_x, 8), ticker_txt, fill=WHITE, font=font(20))
+    tdraw.text((tx - ticker_start_x, 8), ticker_txt, fill=WHITE, font=font(28))
     overlay.paste(ticker_region, (breaking_w, ticker_y), ticker_region)
 
     return overlay

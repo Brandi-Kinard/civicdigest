@@ -8,9 +8,6 @@ Requirements:
 Environment variables:
     TAVILY_API_KEY=your_key
     ANTHROPIC_API_KEY=your_key
-
-Usage:
-    python search_agent.py --query "What did the Chicago city council decide last week?"
 """
 
 import os
@@ -21,7 +18,7 @@ from anthropic import Anthropic
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 TAVILY_API_KEY    = os.environ.get("TAVILY_API_KEY")
 
-CURRENT_YEAR = datetime.now().year   # 2026
+CURRENT_YEAR = datetime.now().year
 
 # ── Step 1: Extract city and intent ───────────────────────────────────────────
 
@@ -29,10 +26,14 @@ QUERY_PARSE_PROMPT = """Extract the city name and topic from this query about ci
 The current year is {current_year}. Always use {current_year} or {prev_year} in the search query — never older years.
 Return ONLY valid JSON:
 {{
-  "city": "full city name (e.g. Chicago, Seattle, Denver)",
+  "city": "full city name (e.g. Chicago, Seattle, Denver), or null if no real city is mentioned",
   "topic": "specific topic if mentioned, or null",
-  "search_query": "optimized web search query to find the most recent city council meeting minutes or decisions. Must include city name, 'city council', and {current_year} or {prev_year}"
+  "search_query": "optimized web search query to find the most recent city council meeting minutes or decisions. Must include city name, 'city council', and {current_year} or {prev_year}",
+  "is_valid_civic_query": true or false
 }}
+
+A valid civic query must reference a real city and something related to local government, city council, budget, zoning, housing, roads, taxes, public safety, or similar civic topics.
+If the query is not about a real city's local government (e.g. it's a general question, a random phrase, or a non-existent place), set is_valid_civic_query to false.
 
 Query: {query}
 Return ONLY the JSON."""
@@ -110,18 +111,31 @@ def find_minutes(query: str) -> tuple[str, str]:
     """
     Takes a natural language query.
     Returns (minutes_text, city_name) ready for the broadcast pipeline.
+    Raises ValueError if the query is not a valid civic query.
     """
     print(f"🔍 Searching: '{query}'")
 
     parsed = parse_query(query)
-    city = parsed.get("city", "Unknown City")
+    city = parsed.get("city")
+    is_valid = parsed.get("is_valid_civic_query", True)
     search_query = parsed.get("search_query", query)
+
+    # Guard: reject non-civic queries
+    if not is_valid or not city:
+        raise ValueError(
+            "Please enter a US city and topic — for example: "
+            "\"Chicago budget vote\" or \"Seattle zoning decisions\" or \"Denver city council this week\"."
+        )
+
     print(f"   📍 City: {city}")
     print(f"   🔎 Search: {search_query}")
 
     results = search_minutes(search_query)
     if not results:
-        raise ValueError(f"No results found for: {search_query}")
+        raise ValueError(
+            f"No recent city council records found for {city}. "
+            "Try a larger city or a more specific topic."
+        )
     print(f"   ✅ Found {len(results)} sources")
 
     minutes_text = extract_meeting_content(query, results)
