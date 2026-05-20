@@ -41,11 +41,18 @@ WHITE      = (255, 255, 255)
 GREY       = (180, 180, 180)
 
 # ── Fonts ─────────────────────────────────────────────────────────────────────
+import glob as _glob
+
 FONT_PATHS = [
+    # macOS
     "/System/Library/Fonts/Helvetica.ttc",
     "/System/Library/Fonts/Arial.ttf",
     "/Library/Fonts/Arial.ttf",
-]
+    # Linux / Railway (Liberation Sans — installed via nixpacks)
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+    "/usr/share/fonts/liberation/LiberationSans-Bold.ttf",
+    "/run/current-system/sw/share/X11/fonts/LiberationSans-Bold.ttf",
+] + _glob.glob("/nix/store/*/share/fonts/truetype/liberation/LiberationSans-Bold.ttf")
 
 def font(size):
     for p in FONT_PATHS:
