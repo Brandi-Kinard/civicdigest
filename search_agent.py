@@ -118,10 +118,10 @@ def find_minutes(query: str) -> tuple[str, str]:
     parsed = parse_query(query)
     city = parsed.get("city")
     is_valid = parsed.get("is_valid_civic_query", True)
-    search_query = parsed.get("search_query", query)
+    search_query = parsed.get("search_query")
 
-    # Guard: reject non-civic queries
-    if not is_valid or not city:
+    # Guard: reject non-civic queries BEFORE hitting any search API
+    if not is_valid or not city or not search_query:
         raise ValueError(
             "Please enter a US city and topic — for example: "
             "\"Chicago budget vote\" or \"Seattle zoning decisions\" or \"Denver city council this week\"."

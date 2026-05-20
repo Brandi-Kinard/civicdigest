@@ -12,6 +12,12 @@ CivicDigest reads them for you — and delivers a plain English summary plus a b
 
 ---
 
+## Watch it in action
+
+[![CivicDigest Demo](https://img.youtube.com/vi/wJZYg_7435s/maxresdefault.jpg)](https://youtu.be/wJZYg_7435s?si=y0GASu8_5vQ14L_J)
+
+---
+
 ## What it does
 
 Type any city. Get:
