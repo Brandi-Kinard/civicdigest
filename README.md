@@ -62,12 +62,15 @@ CivicDigest works best with cities that publish meeting minutes publicly online.
 
 ## Built with
 
-- Fine-tuned language model trained on Apple Silicon
+The intelligence layer — the model that reads and understands city council minutes — is fine-tuned and owned outright, trained locally on Apple Silicon with no cloud compute.
+
+The delivery layer uses best-in-class commercial tools as commodity infrastructure:
+
 - [ElevenLabs](https://elevenlabs.io) — voice synthesis
-- [HeyGen](https://heygen.com) — AI anchor video
+- [HeyGen](https://heygen.com) — AI anchor video  
 - [Tavily](https://tavily.com) — real-time web search
-- [Cloudflare R2](https://cloudflare.com/r2) — audio and video hosting
-- [Railway](https://railway.app) — always-on deployment
+- [Cloudflare R2](https://cloudflare.com/r2) — media hosting
+- [Railway](https://railway.app) — deployment
 
 ---
 
