@@ -287,12 +287,16 @@ def health():
     return jsonify({"status": "ok"})
 
 
-@app.route('/debug/ffmpeg')
-def debug_ffmpeg():
-    import subprocess
-    result = subprocess.run(['find', '/', '-name', 'ffprobe', '-type', 'f'], 
-                          capture_output=True, text=True, timeout=15)
-    return jsonify({"stdout": result.stdout, "stderr": result.stderr[:500]})
+@app.route('/debug/env')
+def debug_env():
+    import subprocess, glob
+    ffmpeg = subprocess.run(['which', 'ffmpeg'], capture_output=True, text=True).stdout.strip()
+    fonts = glob.glob('/usr/share/fonts/**/*.ttf', recursive=True) + \
+            glob.glob('/nix/store/*/share/fonts/**/*.ttf', recursive=True)
+    return jsonify({
+        "ffmpeg": ffmpeg,
+        "fonts": fonts[:20]
+    })
 
 # ── Start ──────────────────────────────────────────────────────────────────────
 
