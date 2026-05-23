@@ -1,8 +1,5 @@
-[phases.setup]
-nixPkgs = ["ffmpeg", "liberation_ttf"]
-
 [phases.build]
-cmds = ["pip install -r requirements.txt"]
+cmds = ["bash build.sh"]
 
 [start]
-cmd = "export PATH=$PATH:/nix/var/nix/profiles/default/bin && python server.py"
+cmd = "python server.py"
