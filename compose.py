@@ -44,15 +44,14 @@ GREY       = (180, 180, 180)
 import glob as _glob
 
 FONT_PATHS = [
-    # macOS
+    # Linux / Railway (confirmed present)
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    # macOS fallback
     "/System/Library/Fonts/Helvetica.ttc",
     "/System/Library/Fonts/Arial.ttf",
     "/Library/Fonts/Arial.ttf",
-    # Linux / Railway (Liberation Sans — installed via nixpacks)
-    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
-    "/usr/share/fonts/liberation/LiberationSans-Bold.ttf",
-    "/run/current-system/sw/share/X11/fonts/LiberationSans-Bold.ttf",
-] + _glob.glob("/nix/store/*/share/fonts/truetype/liberation/LiberationSans-Bold.ttf")
+]
 
 def font(size):
     for p in FONT_PATHS:
@@ -216,27 +215,27 @@ def build_overlay(meta, ots_path, frame_num):
 
 # ── Video info ────────────────────────────────────────────────────────────────
 def get_video_info(path):
-    import imageio_ffmpeg
-    ffmpeg_bin = imageio_ffmpeg.get_ffmpeg_exe()
+    import shutil
+    ffprobe_cmd = shutil.which("ffprobe") or "/usr/bin/ffprobe"
     result = subprocess.run([
-        ffmpeg_bin, "-i", path,
-        "-v", "quiet", "-print_format", "json",
-        "-show_streams", "-show_format",
+        ffprobe_cmd, "-v", "quiet", "-print_format", "json",
+        "-show_streams", "-show_format", path
     ], capture_output=True, text=True)
-    # ffmpeg writes stream info to stderr when probing
-    import re
-    duration_match = re.search(r'"duration":\s*"([^"]+)"', result.stderr + result.stdout)
-    fps_match = re.search(r'"r_frame_rate":\s*"(\d+)/(\d+)"', result.stderr + result.stdout)
-    duration = float(duration_match.group(1)) if duration_match else 30.0
-    fps = int(fps_match.group(1)) / int(fps_match.group(2)) if fps_match else 25.0
-    return duration, fps, 1920, 1080
+    data = json.loads(result.stdout)
+    duration = float(data["format"]["duration"])
+    for s in data["streams"]:
+        if s.get("codec_type") == "video":
+            fps_str = s.get("r_frame_rate", "25/1").split("/")
+            fps = int(fps_str[0]) / int(fps_str[1])
+            return duration, fps, s.get("width", 960), s.get("height", 1080)
+    return duration, 25, 960, 1080
 
 # ── Main compositor ───────────────────────────────────────────────────────────
 def composite_broadcast(anchor_video, ots_path, meta, output_path):
     print("🎬 Compositing broadcast video...")
 
-    import imageio_ffmpeg
-    ffmpeg_cmd = imageio_ffmpeg.get_ffmpeg_exe()
+    import shutil
+    ffmpeg_cmd = shutil.which("ffmpeg") or "/usr/bin/ffmpeg"
 
     duration, fps, aw, ah = get_video_info(anchor_video)
     total = int(duration * fps)
