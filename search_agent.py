@@ -341,10 +341,19 @@ def is_content_sufficient(text: str) -> bool:
     """Check if extracted content has enough substance to summarize."""
     if not text or len(text.split()) < 40:
         return False
+    # Reject content that looks like interface/navigation pages
+    junk_phrases = [
+        "unable to extract", "navigation elements", "loading screen",
+        "system interface", "no actual meeting", "minutes have not been finalized",
+        "not been finalized", "interface pages"
+    ]
+    text_lower = text.lower()
+    if any(phrase in text_lower for phrase in junk_phrases):
+        return False
     civic_keywords = ["motion", "seconded", "approved", "council", "mayor",
                       "resolution", "ordinance", "vote", "budget", "zoning",
                       "council member", "alderman", "amendment", "passed"]
-    hits = sum(1 for kw in civic_keywords if kw.lower() in text.lower())
+    hits = sum(1 for kw in civic_keywords if kw in text_lower)
     return hits >= 2
 
 
