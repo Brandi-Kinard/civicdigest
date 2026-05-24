@@ -51,19 +51,11 @@
   .example-chip span{position:relative;z-index:1;}
   .example-chip:hover,.example-chip.active{color:white;border-color:var(--red);}
 
-  /* Upload toggle */
-  .upload-toggle{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--grey);cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;transition:color 0.2s;}
-  .upload-toggle:hover{color:var(--white);}
-  .upload-toggle::before{content:'↑';font-size:13px;}
-  .upload-panel{display:none;background:var(--navy-mid);border:1px solid var(--border);border-left:3px solid var(--grey);padding:16px 20px;margin-bottom:16px;}
-  .upload-panel.visible{display:block;}
-  .upload-panel p{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--grey);margin-bottom:12px;line-height:1.6;}
-  .upload-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-  .upload-input{background:var(--navy);border:1px solid var(--border);color:var(--white);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:10px 14px;cursor:pointer;flex:1;min-width:0;}
-  .upload-input::file-selector-button{background:var(--red);color:white;border:none;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:6px 12px;cursor:pointer;margin-right:12px;}
-  .upload-btn{background:var(--red);color:white;border:none;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:10px 16px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
-  .upload-btn:hover{background:var(--dark-red);}
-  .upload-btn:disabled{background:#333;cursor:not-allowed;}
+  /* Upload icon button inside input bar */
+  .upload-icon-btn{background:var(--navy-mid);border:1px solid var(--border);border-right:none;border-left:none;color:var(--grey);padding:0 14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color 0.2s,background 0.2s;flex-shrink:0;}
+  .upload-icon-btn:hover{color:var(--white);background:rgba(255,255,255,0.06);}
+  .upload-icon-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+  #uploadInput{display:none;}
 
   /* Disambiguation */
   .disambig-panel{display:none;background:var(--navy-mid);border:1px solid var(--border);border-left:3px solid var(--accent);padding:20px;margin:16px 0;}
@@ -225,6 +217,10 @@
     <div class="input-wrapper">
       <input class="query-input" id="queryInput" type="text"
         placeholder="Type a city and topic..." autocomplete="off"/>
+      <button class="upload-icon-btn" onclick="document.getElementById('uploadInput').click()" title="Upload meeting minutes (PDF or text)">
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </button>
+      <input type="file" id="uploadInput" accept=".pdf,.txt,.doc,.docx" style="display:none" onchange="runUpload()"/>
       <button class="submit-btn" id="submitBtn" onclick="runPipeline()">Generate →</button>
     </div>
     <div class="examples">
@@ -233,14 +229,6 @@
       <div class="example-chip" onclick="setQuery(this)"><span>Denver city council</span></div>
       <div class="example-chip" onclick="setQuery(this)"><span>NYC affordable housing</span></div>
       <div class="example-chip" onclick="setQuery(this)"><span>Phoenix roads</span></div>
-    </div>
-    <div class="upload-toggle" onclick="toggleUpload()">Have minutes? Upload them directly</div>
-    <div class="upload-panel" id="uploadPanel">
-      <p>Upload a PDF or text file of city council meeting minutes and CivicDigest will generate an audio summary and broadcast video from your document.</p>
-      <div class="upload-row">
-        <input type="file" class="upload-input" id="uploadInput" accept=".pdf,.txt,.doc,.docx">
-        <button class="upload-btn" id="uploadBtn" onclick="runUpload()">Generate from file →</button>
-      </div>
     </div>
   </div>
 
@@ -425,18 +413,13 @@ function showDisambig(options, originalQuery) {
   panel.classList.add('visible');
 }
 
-function toggleUpload() {
-  const p = document.getElementById('uploadPanel');
-  p.classList.toggle('visible');
-}
-
 async function runUpload() {
   const file = document.getElementById('uploadInput').files[0];
-  if (!file) { showError('Please select a file first.'); return; }
+  if (!file) return;
   if (file.size > 5 * 1024 * 1024) { showError('File too large. Maximum 5MB.'); return; }
 
-  const btn = document.getElementById('uploadBtn');
-  btn.disabled = true; btn.textContent = 'Uploading...';
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('submitBtn').textContent = 'Reading file...';
 
   const formData = new FormData();
   formData.append('file', file);
@@ -445,12 +428,12 @@ async function runUpload() {
     const res = await fetch(`${API_BASE}/upload`, { method: 'POST', body: formData });
     if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Upload failed'); }
     const data = await res.json();
-    document.getElementById('uploadPanel').classList.remove('visible');
     document.getElementById('queryInput').value = data.city || 'Uploaded minutes';
     runPipelineWithMinutes(data.minutes_text, data.city || 'Uploaded Document');
   } catch(e) {
     showError(e.message);
-    btn.disabled = false; btn.textContent = 'Generate from file →';
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('submitBtn').textContent = 'Generate →';
   }
 }
 
@@ -531,26 +514,26 @@ function skipAudio(s) {
 function startProgressTimer() {
   videoStartTime = Date.now();
   if (progressTimer) clearInterval(progressTimer);
+  const TOTAL_MINS = 30;
   progressTimer = setInterval(() => {
-    const elapsed = Math.floor((Date.now() - videoStartTime) / 1000);
-    const mins = Math.floor(elapsed / 60);
-    const secs = elapsed % 60;
-    const remaining = Math.max(0, 30 - mins);
-    const statusEl = document.getElementById('renderStatusText');
-    if (statusEl && document.getElementById('renderTag').textContent === 'IN QUEUE' ||
-        document.getElementById('renderTag').textContent.includes('min')) {
-      if (mins < 1) {
-        statusEl.textContent = `Rendering broadcast video — about 30 minutes remaining...`;
-      } else if (remaining > 1) {
-        statusEl.textContent = `Rendering broadcast video — about ${remaining} minutes remaining...`;
-      } else if (remaining === 1) {
-        statusEl.textContent = `Rendering broadcast video — almost done...`;
-      } else {
-        statusEl.textContent = `Finalizing broadcast video...`;
-      }
-      document.getElementById('renderTag').textContent = `~${remaining}m`;
+    const elapsedMins = (Date.now() - videoStartTime) / 60000;
+    const remaining = Math.max(0, Math.round(TOTAL_MINS - elapsedMins));
+    const tag = document.getElementById('renderTag');
+    const status = document.getElementById('renderStatusText');
+    if (!tag || tag.textContent === 'READY' || tag.textContent === 'FAILED') {
+      clearInterval(progressTimer); return;
     }
-  }, 30000);
+    if (remaining > 1) {
+      status.textContent = `Rendering broadcast video — about ${remaining} minutes remaining...`;
+      tag.textContent = `~${remaining}m`;
+    } else if (remaining === 1) {
+      status.textContent = `Rendering broadcast video — almost done...`;
+      tag.textContent = `~1m`;
+    } else {
+      status.textContent = `Finalizing broadcast video...`;
+      tag.textContent = `soon`;
+    }
+  }, 60000);
 }
 
 function startPolling(jobId) {
