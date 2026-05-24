@@ -171,13 +171,13 @@ def build_overlay(meta, ots_path, frame_num):
         draw.rectangle([ots_x, ots_y, ots_x + ots_w, ots_y + ots_h], fill=(*NAVY_SOLID, 255))
     # Topic tag bar below OTS image
     draw.rectangle([ots_x, ots_y + ots_h, ots_x + ots_w, ots_y + ots_h + 36], fill=(*RED, 255))
-    draw.text((ots_x + 12, ots_y + ots_h + 6), topic, fill=WHITE, font=font(36))
+    draw.text((ots_x + 12, ots_y + ots_h + 6), topic, fill=WHITE, font=font(28))
 
     # ── Headline bar ──────────────────────────────────────────────────────────
     hl_y = 820
     hl_w = ots_x - 40          # spans from left to just before OTS column
     draw.rectangle([30, hl_y, hl_w, hl_y + 52], fill=(*NAVY_SOLID, 215))
-    draw.text((50, hl_y + 10), headline, fill=WHITE, font=font(44))
+    draw.text((50, hl_y + 10), headline, fill=WHITE, font=font(38))
 
     # ── Lower thirds ─────────────────────────────────────────────────────────
     lt_y = 878
