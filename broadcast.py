@@ -62,7 +62,8 @@ Rules:
 - Plain language. Write for a busy resident who skipped the meeting.
 - No jargon. No legalese.
 - Start with the substance — no intro like "This meeting covered..."
-- If the text contains no real meeting content, reply with exactly: SKIP
+- If the text is completely empty, gibberish, or clearly unrelated to government meetings, reply with exactly: SKIP
+- Structured formats like "ITEM:", "ACTION:", "NOTES:" are valid meeting content — summarize them
 
 Meeting text:
 {minutes}
