@@ -247,7 +247,7 @@ def fetch_legistar(city: str) -> str:
     try:
         resp = requests.get(
             f"{base}/events",
-            params={"$top": 5, "$orderby": "EventDate desc"},
+            params={"$top": 10, "$orderby": "EventDate desc"},
             headers=HEADERS,
             timeout=15
         )
@@ -339,7 +339,7 @@ def extract_from_tavily(query: str, results: list) -> str:
 
 def is_content_sufficient(text: str) -> bool:
     """Check if extracted content has enough substance to summarize."""
-    if not text or len(text.split()) < 40:
+    if not text or len(text.split()) < 10:
         return False
     # Reject content that looks like interface/navigation pages
     junk_phrases = [
@@ -350,12 +350,15 @@ def is_content_sufficient(text: str) -> bool:
     text_lower = text.lower()
     if any(phrase in text_lower for phrase in junk_phrases):
         return False
-    civic_keywords = ["motion", "seconded", "approved", "council", "mayor",
-                      "resolution", "ordinance", "vote", "budget", "zoning",
-                      "council member", "alderman", "amendment", "passed"]
+    civic_keywords = [
+        "motion", "seconded", "approved", "council", "mayor",
+        "resolution", "ordinance", "vote", "budget", "zoning",
+        "council member", "alderman", "amendment", "passed",
+        "meeting", "committee", "commission", "board", "hearing",
+        "item", "agenda", "public facilities", "school committee"
+    ]
     hits = sum(1 for kw in civic_keywords if kw in text_lower)
-    return hits >= 2
-
+    return hits >= 1
 
 # ── Main function ──────────────────────────────────────────────────────────────
 
@@ -389,33 +392,44 @@ def find_minutes(query: str) -> tuple[str, str]:
         print(f"   ✅ Found {len(results)} Tavily sources")
         minutes_text = extract_from_tavily(query, results)
 
-    # Step 2: Check if Tavily content is sufficient
+    # Step 2: Legistar fallback if Tavily is thin
     if not is_content_sufficient(minutes_text):
         print(f"   ⚠️  Tavily content thin — trying Legistar API...")
         legistar_text = fetch_legistar(city)
-
         if legistar_text and is_content_sufficient(legistar_text):
-            print(f"   ✅ Legistar content found")
             minutes_text = legistar_text
-        elif legistar_text and minutes_text:
-            # Combine both
-            minutes_text = minutes_text + "\n\n" + legistar_text
-            print(f"   ✅ Combined Tavily + Legistar content")
+            print(f"   ✅ Legistar content found")
         elif legistar_text:
             minutes_text = legistar_text
-        else:
-            # Both thin — try broader Tavily search without date
-            broad_query = f"{city} city council meeting decisions"
-            print(f"   🔄 Trying broader search: {broad_query}")
-            broad_results = search_tavily(broad_query)
-            if broad_results:
-                minutes_text = extract_from_tavily(broad_query, broad_results)
+            print(f"   ✅ Added Legistar content (sparse)")
+
+    # Step 3: Broad news search — always try, add good content
+    broad_query = f"{city} city council vote decision news 2026"
+    print(f"   🔄 Trying broader search: {broad_query}")
+    broad_results = search_tavily(broad_query)
+    if broad_results:
+        broad_text = extract_from_tavily(broad_query, broad_results)
+        if broad_text and is_content_sufficient(broad_text):
+            minutes_text = broad_text
+            print(f"   ✅ Broad search content found")
+
+    # Step 4: Final fallback
+    if not is_content_sufficient(minutes_text):
+        final_query = f"{city} city council 2025 2026 decisions residents"
+        print(f"   🔄 Final search attempt: {final_query}")
+        final_results = search_tavily(final_query)
+        if final_results:
+            final_text = extract_from_tavily(final_query, final_results)
+            if final_text and is_content_sufficient(final_text):
+                minutes_text = final_text
+                print(f"   ✅ Final search content found")
 
     if not is_content_sufficient(minutes_text):
         raise ValueError(
-            f"We couldn't find recent council records for {city}. "
-            "Try a major US city like Chicago, Seattle, or Denver — "
-            "or add more detail like \"Boston city council budget 2026\"."
+            f"We couldn't find enough recent council activity for {city}. "
+            "CivicDigest works best with major US cities. Try: "
+            "\"Chicago budget vote\", \"Seattle zoning\", \"Denver city council\", "
+            "\"NYC housing\", or \"Phoenix roads\"."
         )
 
     print(f"   ✅ Extracted {len(minutes_text.split())} words of meeting content")
