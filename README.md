@@ -2,7 +2,7 @@
 
 **Local government intelligence. Plain English. On demand.**
 
-[**→ Try the live demo**](https://civicdigest-production.up.railway.app)
+[**→ Try the live demo**](https://civicdigest.app)
 
 ---
 
