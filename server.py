@@ -279,6 +279,32 @@ def list_subscribers():
     subscribers = r2_get_subscribers()
     return jsonify({"count": len(subscribers), "subscribers": subscribers})
 
+@app.route('/upload', methods=['POST'])
+def upload_minutes():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+    file = request.files['file']
+    if file.content_length and file.content_length > 5 * 1024 * 1024:
+        return jsonify({"error": "File too large. Maximum 5MB."}), 400
+    filename = file.filename.lower()
+    try:
+        if filename.endswith('.pdf'):
+            import pdfplumber, io
+            with pdfplumber.open(io.BytesIO(file.read())) as pdf:
+                text = '\n\n'.join(p.extract_text() or '' for p in pdf.pages)
+        else:
+            text = file.read().decode('utf-8', errors='ignore')
+        if len(text.strip()) < 100:
+            return jsonify({"error": "File appears empty or unreadable."}), 400
+        # Try to extract city name from content
+        city = "Uploaded Document"
+        import re
+        city_match = re.search(r'CITY[:\s]+([A-Z][a-zA-Z\s]+)', text)
+        if city_match:
+            city = city_match.group(1).strip()
+        return jsonify({"minutes_text": text[:8000], "city": city})
+    except Exception as e:
+        return jsonify({"error": f"Could not read file: {str(e)}"}), 400
 
 @app.route('/video/<path:filename>')
 def serve_video(filename):

@@ -10,3 +10,4 @@ ffmpeg-python
 gunicorn
 imageio[ffmpeg]
 imageio-ffmpeg
+pdfplumber
